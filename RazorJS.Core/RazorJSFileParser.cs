@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RazorEngine;
+using RazorEngine.Templating;
 using RazorJS.Configuration;
 using System.Configuration;
 using System.Web;
@@ -76,7 +78,12 @@ namespace RazorJS
 
                 if (!CachedFileAccess.IsCompiled(name))
                 {
-                    RazorEngine.Razor.SetTemplateBase(typeof(HtmlTemplateBase));
+                    var config = new RazorEngine.Configuration.TemplateServiceConfiguration
+                    {
+                        BaseTemplateType = typeof (HtmlTemplateBase)
+                    };
+                    var service = new RazorEngine.Templating.TemplateService(config);
+                    RazorEngine.Razor.SetTemplateService(service);
                     RazorEngine.Razor.Compile(template, name);
                     CachedFileAccess.SetCompiled(name);
                 }
@@ -100,11 +107,15 @@ namespace RazorJS
 
                 if (!CachedFileAccess.IsCompiled(name))
                 {
-                    RazorEngine.Razor.SetTemplateBase(typeof(HtmlTemplateBase<>));
+                    var config = new RazorEngine.Configuration.TemplateServiceConfiguration
+                    {
+                        BaseTemplateType = typeof(HtmlTemplateBase)
+                    };
+                    var service = new RazorEngine.Templating.TemplateService(config);
                     RazorEngine.Razor.Compile(template, typeof(T), name);
                     CachedFileAccess.SetCompiled(name);
                 }
-                return RazorEngine.Razor.Run(model, name);
+                return RazorEngine.Razor.Run(name, model);
             }
             catch (RazorEngine.Templating.TemplateCompilationException ex)
             {
